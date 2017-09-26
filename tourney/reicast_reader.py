@@ -18,9 +18,9 @@ class ReicastReader(ProcessReader):
         if not self.base_address:
             raise Exception("Unable to find reicast process with symbol _vmem_MemInfo_ptr")
 
-        ProcessReader.__init__(pid, **entries)
+        ProcessReader.__init__(self, pid, **entries)
 
     def _add_value(self, name, address, length, is_int=True):
         offset = address & 0x0FFFFFF
         actual_address = self.base_address + offset
-        ProcessReader._add_value(name, actual_address, length, is_int)
+        ProcessReader._add_value(self, name, actual_address, length, is_int)

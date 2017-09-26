@@ -19,7 +19,7 @@ class ProcessReader:
         self.pid = pid
         self._entries = []
         for key in entries:
-            self._add_value(key, entries[key].addres, entries[key].length)
+            self._add_value(key, entries[key].address, entries[key].length)
 
     def update(self):
         ProcessReader._read_values(self.pid, self._entries)
