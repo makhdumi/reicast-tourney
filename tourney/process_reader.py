@@ -28,8 +28,10 @@ class ProcessReader:
 
     @staticmethod
     def read_value(pid, address, length, as_int=True):
+	print "reading %x from process %d"  % (address, pid)
         entries = [MemoryEntry(address, length, is_int=as_int)]
         result = ProcessReader._read_values(pid, entries)[0].value
+	return result
 
     @staticmethod
     def _read_values(pid, entries):
