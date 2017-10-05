@@ -11,12 +11,12 @@ class ReicastReader(ProcessReader):
         exe = subprocess.check_output(["readlink", "-f", "/proc/%d/exe" % pid]).split("\n")[0]
         objdump = subprocess.check_output(["objdump", "-x", exe])
 
-	self.base_address = None
+        self.base_address = None
         for line in objdump.split("\n"):
             if "_vmem_MemInfo_ptr" in line:
-		print line
+                print line
                 vmem_info_addr = int(re.split("\\s+", line)[0], 16)
-		print "vmem_info = %x\n" % vmem_info_addr
+                print "vmem_info = %x\n" % vmem_info_addr
                 self.base_address = (ProcessReader.read_value(pid, vmem_info_addr + 0xC*4, 4)) & ~0xF
 
         if self.base_address is None:

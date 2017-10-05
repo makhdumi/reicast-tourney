@@ -3,4 +3,5 @@ from tourney.marvelvscapcom2 import MarvelVsCapcom2
 game = MarvelVsCapcom2()
 game.update()
 
-print "p1 health = %x" % game.p1_health
+for k in game.__dict__:
+    print "%s = %d" % (k, game.k)
