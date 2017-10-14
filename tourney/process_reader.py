@@ -4,12 +4,18 @@ class iovec(c.Structure):
     _fields_ = [("iov_base", c.c_void_p), ("iov_len", c.c_size_t)]
 
 class MemoryEntry:
-    def __init__(self, address, length, name=None, is_int=True):
+    def __init__(self, address, length, name=None, is_int=True, transform_func=None):
         self.name = name
         self.address = address
         self.length = length
         self.is_int = is_int
         self.value = None
+        self.transform_func = transform_func
+
+    def get_value(self):
+        print "calling with %d" % self.value
+        if self.transform_func: self.transform_func(0)
+        return self.transform_func(self.value) if self.transform_func else self.value
 
 class ProcessReader:
 
@@ -24,7 +30,7 @@ class ProcessReader:
     def update(self):
         ProcessReader._read_values(self.pid, self._entries)
         for entry in self._entries:
-            self.__dict__[entry.name] = entry.value
+            self.__dict__[entry.name] = entry.get_value()
 
     @staticmethod
     def read_value(pid, address, length, as_int=True):
@@ -69,8 +75,8 @@ class ProcessReader:
 
         return entries
 
-    def _add_value(self, name, address, length, is_int=True):
-        entry = MemoryEntry(address, length, name=name, is_int=is_int)
+    def _add_value(self, name, address, length, is_int=True, transform_func=None):
+        entry = MemoryEntry(address, length, name=name, is_int=is_int, transform_func=transform_func)
         self._entries.append(entry)
         self._c_entries = None
 

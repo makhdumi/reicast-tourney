@@ -5,14 +5,14 @@ CHARACTER_CODES = {
     0x20: "Felicia",
     0x1c: "Megaman",
     0x38: "Captain Commando",
-    0x07: "Wolverine2",
+    0x07: "Wolverine [Adamantium]",
     0x2d: "Shuma Gorath",
     0x36: "Thanos",
     0x23: "Dan",
     0x02: "Guile",
     0x15: "Amingo",
     0x06: "Cyclops",
-    0x39: "Wolverine1",
+    0x39: "Wolverine [Bone]",
     0x2e: "War Machine",
     0x27: "Ken",
     0x1f: "B.B. hood",
@@ -60,23 +60,28 @@ CHARACTER_CODES = {
     0x34: "Sentinel",
 }
 
+def get_char_name(id):
+        return CHARACTER_CODES[id]
+
 class MarvelVsCapcom2(ReicastReader):
 
     # values from http://gamehacking.org/game/51908
     def __init__(self, pid=None):
         ReicastReader.__init__(self, pid)
 
-        player_offset = 0xb48
-        character_offset = 0x5a4
+        player_offset = 0x5a4
+        character_offset = 0xb48
 
         p1_c1_health = 0xc268760
-        p1_c1_id = 0xc268760
+        p1_c1_id = 0xc26886c
 
-        for p in range(1, 3):
-            for c in range(1, 2):
-                self._add_value("p%d_c%d_health" % (p, c),
-                                p1_c1_health + player_offset * (p-1) + character_offset * (c-1), 4)
-                self._add_value("p%d_c%d_id" % (p, c),
-                                p1_c1_id + player_offset * (p-1) + character_offset * (c-1), 4)
+        for p in range(0, 2):
+            for c in range(0, 3):
+		print "p_off = %x, c_off = %x, p%d_c%d_health = 0x%x" % (player_offset*p, character_offset*c, p, c, p1_c1_health + player_offset*p + character_offset*c)
+		print "p%d_c%d_id = 0x%x" % (p, c, p1_c1_id + player_offset*p + character_offset*c)
+                self._add_value("p%d_c%d_health" % (p+1, c+1),
+                                p1_c1_health + player_offset*p + character_offset*c, 4, True, None)
 
-                self._add_value("p%d_c%d_id" % (p,c), 0xc26886c + player_offset * (p-1), 4)
+                self._add_value("p%d_c%d_id" % (p+1, c+1),
+                                p1_c1_id + player_offset*p + character_offset*c, 1, True, get_char_name)
+

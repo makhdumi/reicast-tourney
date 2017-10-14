@@ -24,7 +24,8 @@ class ReicastReader(ProcessReader):
 
         ProcessReader.__init__(self, pid, **entries)
 
-    def _add_value(self, name, address, length, is_int=True):
+    def _add_value(self, name, address, length, is_int, transform_func):
+	print "transform = %s" % transform_func
         offset = address & 0x0FFFFFF
         actual_address = self.base_address + offset
-        ProcessReader._add_value(self, name, actual_address, length, is_int)
+        ProcessReader._add_value(self, name, actual_address, length, is_int, transform_func)
