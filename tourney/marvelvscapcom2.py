@@ -61,27 +61,85 @@ CHARACTER_CODES = {
 }
 
 def get_char_name(id):
-        return CHARACTER_CODES[id]
+    return CHARACTER_CODES[id]
+
+class State:
+    Unknown, UnknownPaused, SetTimer, CheckTimer, MatchActive, MatchPaused, MatchDone = range(7)
 
 class MarvelVsCapcom2(ReicastReader):
 
-    # values from http://gamehacking.org/game/51908
+    def get_timer_value(self):
+        return self.timer*120 + self.timer_part
+
+    def next_state(self):
+	print "current state = %d. paused? = %d" % (self.state, self.paused)
+        if self.state == State.Unknown:
+            if self.paused:
+                self.state = State.UnknownPaused
+            elif self.timer > 0:
+                print "SET TIMER"
+                self.state = State.SetTimer
+            else:
+                self.state = State.Unknown
+        elif self.state == State.UnknownPaused:
+            if self.paused:
+                self.state = State.UnknownPaused
+            else:
+                self.state = State.Unknown
+        elif self.state == State.SetTimer:
+            print("WHAT THE FUCK?")
+            # todo: change to match active
+            self.time_check_start = self.get_timer_value()
+            self.state = State.CheckTimer
+            print("set timer=%s" % str(self.time_check_start))
+        elif self.state == State.CheckTimer:
+            timer_dec = self.get_timer_value() - self.time_check_start > 0
+            if not timer_dec:
+                self.state = State.Unknown
+            else:
+                self.state = State.MatchActive
+        # match is active?
+        elif self.state == State.MatchActive:
+            if self.p1_c1_id == 0:
+                self.state = State.Unknown
+            if self.paused:
+                self.state = State.MatchPaused
+            if self.match_done:
+                self.state = State.MatchDone
+        elif self.state == State.MatchPaused:
+            if self.paused:
+                self.state = State.MatchPaused
+            else:
+                self.state = State.MatchActive
+        elif self.state == State.MatchDone:
+            print("MATCH COMPLETE!!!")
+            self.state = 6
+	print "next state = %d" % self.state
+        
+
     def __init__(self, pid=None):
         ReicastReader.__init__(self, pid)
+        self.state = 0
+
+        self._add_value("timer", 0xc289620, 1, True, None)
+        self._add_value("timer_part", 0xc289621, 1, True, None)
+
+        self._add_value("match_done", 0xc289636, 1, True, None)
+
+	self._add_value("paused", 0xc2682cd, 1, True, None)
+       
 
         player_offset = 0x5a4
         character_offset = 0xb48
-
         p1_c1_health = 0xc268760
         p1_c1_id = 0xc26886c
 
         for p in range(0, 2):
             for c in range(0, 3):
-		print "p_off = %x, c_off = %x, p%d_c%d_health = 0x%x" % (player_offset*p, character_offset*c, p, c, p1_c1_health + player_offset*p + character_offset*c)
-		print "p%d_c%d_id = 0x%x" % (p, c, p1_c1_id + player_offset*p + character_offset*c)
                 self._add_value("p%d_c%d_health" % (p+1, c+1),
                                 p1_c1_health + player_offset*p + character_offset*c, 4, True, None)
 
                 self._add_value("p%d_c%d_id" % (p+1, c+1),
                                 p1_c1_id + player_offset*p + character_offset*c, 1, True, get_char_name)
+
 

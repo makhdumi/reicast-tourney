@@ -14,9 +14,7 @@ class ReicastReader(ProcessReader):
         self.base_address = None
         for line in objdump.split("\n"):
             if "_vmem_MemInfo_ptr" in line:
-                print line
                 vmem_info_addr = int(re.split("\\s+", line)[0], 16)
-                print "vmem_info = %x\n" % vmem_info_addr
                 self.base_address = (ProcessReader.read_value(pid, vmem_info_addr + 0xC*4, 4)) & ~0xF
 
         if self.base_address is None:
@@ -25,7 +23,6 @@ class ReicastReader(ProcessReader):
         ProcessReader.__init__(self, pid, **entries)
 
     def _add_value(self, name, address, length, is_int, transform_func):
-	print "transform = %s" % transform_func
         offset = address & 0x0FFFFFF
         actual_address = self.base_address + offset
         ProcessReader._add_value(self, name, actual_address, length, is_int, transform_func)

@@ -13,7 +13,6 @@ class MemoryEntry:
         self.transform_func = transform_func
 
     def get_value(self):
-        print "calling with %d" % self.value
         if self.transform_func: self.transform_func(0)
         return self.transform_func(self.value) if self.transform_func else self.value
 
@@ -34,7 +33,6 @@ class ProcessReader:
 
     @staticmethod
     def read_value(pid, address, length, as_int=True):
-        print "reading %x from process %d"  % (address, pid)
         entries = [MemoryEntry(address, length, is_int=as_int)]
         result = ProcessReader._read_values(pid, entries)[0].value
         return result
@@ -66,7 +64,6 @@ class ProcessReader:
             if entries[i].is_int:
                 entries[i].value = 0
                 for j in range(entries[i].length):
-                    print ord(entries[i].buf[j])
                     # ARMv7 is little-endian
                     entries[i].value |= (ord(entries[i].buf[j]) << (j*8))
 
