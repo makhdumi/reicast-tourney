@@ -87,7 +87,6 @@ class MarvelVsCapcom2(ReicastReader):
             else:
                 self.state = State.Unknown
         elif self.state == State.SetTimer:
-            print("WHAT THE FUCK?")
             # todo: change to match active
             self.time_check_start = self.get_timer_value()
             self.state = State.CheckTimer
